@@ -5,8 +5,10 @@ before_install:
     - echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/ ./" | sudo tee -a /etc/apt/sources.list
     - wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/Release.key -O- | sudo apt-key add
     - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - sudo add-apt-repository -y ppa:chris-lea/libpgm
+    - sudo add-apt-repository -y ppa:chris-lea/libsodium
     - sudo apt-get update
-    - sudo apt-get install libzmq3-dev libzmq5
+    - sudo apt-get install libzmq3-dev libzmq5 libsodium-dev
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&

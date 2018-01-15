@@ -2,9 +2,10 @@ language: rust
 rust:
 - nightly
 before_install:
-    - sudo apt-add-repository -y ppa:chris-lea/zeromq
+    - echo "deb http://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/ ./" >> /etc/apt/sources.list
+    - wget https://download.opensuse.org/repositories/network:/messaging:/zeromq:/release-stable/Debian_9.0/Release.key -O- | sudo apt-key add
     - sudo apt-get update
-    - sudo apt-get install -y zeromq3
+    - apt-get install libzmq3-dev
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&

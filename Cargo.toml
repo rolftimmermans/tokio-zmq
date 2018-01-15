@@ -5,6 +5,7 @@ version = "0.3.0"
 license = "GPL-3.0"
 authors = ["Riley Trautman <asonix.dev@gmail.com>"]
 repository = "https://github.com/asonix/tokio-zmq"
+documentation = "https://asonix.github.io/tokio-zmq/tokio_zmq/index.html"
 readme = "README.md"
 keywords = ["zmq", "zeromq", "futures", "tokio"]
 

@@ -12,12 +12,12 @@ script:
     - ls "$LIBZMQ_INCLUDE_DIR"
     - echo "$LIBZMQ_LIB_DIR"
     - ls "$LIBZMQ_LIB_DIR"
-    - RUSTFLAGS="-L $LIBZMQ_LIB_DIR" cargo build
-    - RUSTFLAGS="-L $LIBZMQ_LIB_DIR" cargo test
+    - RUSTFLAGS="-L native=$LIBZMQ_LIB_DIR" cargo build
+    - RUSTFLAGS="-L native=$LIBZMQ_LIB_DIR" cargo test
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&
-  RUSTFLAGS="-L $LIBZMQ_LIB_DIR" cargo doc --no-deps &&
+  RUSTFLAGS="-L native=$LIBZMQ_LIB_DIR" cargo doc --no-deps &&
   echo "<meta http-equiv=refresh content=0;url=tokio_zmq/index.html>" > target/doc/index.html &&
   sudo pip install ghp-import &&
   ghp-import -n target/doc &&

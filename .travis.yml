@@ -8,12 +8,13 @@ before_install:
     - source ~/.nix-profile/etc/profile.d/nix.sh
     - nix-env -i zeromq
 script:
-    - nix-shell --run "cargo build"
-    - nix-shell --run "cargo test"
+    - nix-shell -p rustup zeromq --run "rustup default nightly"
+    - nix-shell -p rustup zeromq --run "cargo build"
+    - nix-shell -p rustup zeromq --run "cargo test"
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&
-  nix-shell --run "cargo doc --no-deps" &&
+  nix-shell -p rustup zeromq --run "cargo doc --no-deps" &&
   echo "<meta http-equiv=refresh content=0;url=tokio_zmq/index.html>" > target/doc/index.html &&
   sudo pip install ghp-import &&
   ghp-import -n target/doc &&

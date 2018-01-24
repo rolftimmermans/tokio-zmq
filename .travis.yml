@@ -7,8 +7,8 @@ before_install:
     - curl https://nixos.org/nix/install | sh && . ~/.nix-profile/etc/profile.d/nix.sh
     - source ~/.nix-profile/etc/profile.d/nix.sh
 script:
-    - nix-env -i zeromq
-    - sudo cp -r "$LIBZMQ_LIB_DIR"/* /usr/lib
+    - nix-env -i zeromq glibc gcc
+    - sudo cp -r "$LIBZMQ_LIB_DIR"/*.{so,a} /usr/lib
     - sudo cp -r "$LIBZMQ_INCLUDE_DIR"/* /usr/include
     - cargo build
     - cargo test

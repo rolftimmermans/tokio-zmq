@@ -2,11 +2,11 @@ language: rust
 group: travis_latest
 rust:
 - nightly
+sudo: required
 before_install:
-    - sudo apt-get update
-    - sudo apt search zeromq
-    - sudo apt search zmq
-    - sudo apt-get install libzmq3-dev
+    - curl https://nixos.org/nix/install | sh && . ~/.nix-profile/etc/profile.d/nix.sh
+    - source ~/.nix-profile/etc/profile.d/nix.sh
+    - nix-env -i zeromq
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&

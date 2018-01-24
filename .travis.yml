@@ -11,6 +11,14 @@ before_install:
     - ls "$LIBZMQ_INCLUDE_DIR"
     - echo "$LIBZMQ_LIB_DIR"
     - ls "$LIBZMQ_LIB_DIR"
+script:
+    - nix-env -i zeromq
+    - echo "$LIBZMQ_INCLUDE_DIR"
+    - ls "$LIBZMQ_INCLUDE_DIR"
+    - echo "$LIBZMQ_LIB_DIR"
+    - ls "$LIBZMQ_LIB_DIR"
+    - cargo build
+    - cargo test
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&

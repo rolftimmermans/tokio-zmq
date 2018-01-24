@@ -7,6 +7,10 @@ before_install:
     - curl https://nixos.org/nix/install | sh && . ~/.nix-profile/etc/profile.d/nix.sh
     - source ~/.nix-profile/etc/profile.d/nix.sh
     - nix-env -i zeromq
+    - echo "$LIBZMQ_INCLUDE_DIR"
+    - ls "$LIBZMQ_INCLUDE_DIR"
+    - echo "$LIBZMQ_LIB_DIR"
+    - ls "$LIBZMQ_LIB_DIR"
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&

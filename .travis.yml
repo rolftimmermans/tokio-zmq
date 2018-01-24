@@ -8,12 +8,10 @@ before_install:
     - source ~/.nix-profile/etc/profile.d/nix.sh
 script:
     - nix-env -i zeromq
-    - echo "$LIBZMQ_INCLUDE_DIR"
-    - ls "$LIBZMQ_INCLUDE_DIR"
-    - echo "$LIBZMQ_LIB_DIR"
-    - ls "$LIBZMQ_LIB_DIR"
-    - RUSTFLAGS="-L native=$LIBZMQ_LIB_DIR" cargo build
-    - RUSTFLAGS="-L native=$LIBZMQ_LIB_DIR" cargo test
+    - sudo cp -r "$LIBZMQ_LIB_DIR"/* /usr/lib
+    - sudo cp -r "$LIBZMQ_INCLUDE_DIR"/* /usr/include
+    - cargo build
+    - cargo test
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&

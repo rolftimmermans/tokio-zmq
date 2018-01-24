@@ -8,12 +8,12 @@ before_install:
     - source ~/.nix-profile/etc/profile.d/nix.sh
     - nix-env -i zeromq
 script:
-    - nix-shell --command cargo build --run
-    - nix-shell --command cargo test --run
+    - nix-shell --run cargo build
+    - nix-shell --run cargo test
 after_success: |
   [ $TRAVIS_BRANCH = master ] &&
   [ $TRAVIS_PULL_REQUEST = false ] &&
-  nix-shell --command cargo doc --no-deps &&
+  nix-shell --run cargo doc --no-deps &&
   echo "<meta http-equiv=refresh content=0;url=tokio_zmq/index.html>" > target/doc/index.html &&
   sudo pip install ghp-import &&
   ghp-import -n target/doc &&

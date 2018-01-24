@@ -8,8 +8,8 @@ before_install:
     - source ~/.nix-profile/etc/profile.d/nix.sh
 script:
     - nix-env -i zeromq glibc gcc
-    - sudo cp -r "$LIBZMQ_LIB_DIR"/*.{so,a} /usr/lib
-    - sudo cp -r "$LIBZMQ_INCLUDE_DIR"/* /usr/include
+    - sudo cp -rL "$LIBZMQ_LIB_DIR"/* /usr/lib
+    - sudo cp -rL "$LIBZMQ_INCLUDE_DIR"/* /usr/include
     - cargo build
     - cargo test
 after_success: |

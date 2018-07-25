@@ -23,7 +23,8 @@
 use std::rc::Rc;
 
 use zmq;
-use tokio_core::reactor::PollEvented;
+use mio::Ready;
+use tokio_reactor::PollEvented;
 use tokio_file_unix::File;
 use futures::{Async, AsyncSink, Future, Poll};
 use futures::task;
@@ -38,19 +39,16 @@ use file::ZmqFile;
 /// You shouldn't ever need to manually create one, but if you do, the following will suffice.
 /// ### Example
 /// ```rust
-/// # #![feature(conservative_impl_trait)]
-/// # #![feature(try_from)]
-/// #
 /// # extern crate zmq;
 /// # extern crate futures;
 /// # extern crate tokio_core;
 /// # extern crate tokio_zmq;
 /// #
 /// # use std::rc::Rc;
-/// # use std::convert::TryInto;
+/// # use std::convert::Into;
 /// #
 /// # use futures::Future;
-/// # use tokio_core::reactor::Core;
+/// # use tokio_reactor::Core;
 /// # use tokio_zmq::prelude::*;
 /// # use tokio_zmq::async::MultipartRequest;
 /// # use tokio_zmq::{Error, Rep, Socket};
@@ -63,8 +61,7 @@ use file::ZmqFile;
 /// #     let ctx = Rc::new(zmq::Context::new());
 /// #     let rep: Rep = Socket::builder(ctx, &core.handle())
 /// #         .bind("tcp://*:5567")
-/// #         .try_into()
-/// #         .unwrap();
+/// #         .into();
 /// #     let socket = rep.socket();
 /// #     let sock = socket.inner_sock();
 /// #     let file = socket.inner_file();
@@ -107,7 +104,7 @@ impl MultipartRequest {
                 Some(msg) => msg,
                 None => {
                     self.multipart = None;
-                    self.file.need_write();
+                    self.file.clear_read_ready(Ready::readable())?;
                     task::current().notify();
                     break;
                 }
@@ -145,7 +142,7 @@ impl MultipartRequest {
         let events = self.sock.get_events()? as i16;
 
         if events & zmq::POLLOUT == 0 {
-            self.file.need_write();
+            self.file.clear_write_ready()?;
 
             task::current().notify();
 
@@ -170,12 +167,12 @@ impl MultipartRequest {
     }
 
     fn check_write(&mut self) -> Result<bool, Error> {
-        if let Async::NotReady = self.file.poll_write() {
+        if let Ok(Async::NotReady) = self.file.poll_write_ready() {
             // Get the events currently waiting on the socket
             let events = self.sock.get_events()? as i16;
             if events & zmq::POLLOUT != 0 {
                 // manually schedule a wakeup and procede
-                self.file.need_write();
+                self.file.clear_write_ready()?;
                 task::current().notify();
             } else {
                 return Ok(false);
@@ -204,19 +201,16 @@ impl Future for MultipartRequest {
 /// You shouldn't ever need to manually create one, but if you do, the following will suffice.
 /// ### Example
 /// ```rust
-/// # #![feature(conservative_impl_trait)]
-/// # #![feature(try_from)]
-/// #
 /// # extern crate zmq;
 /// # extern crate futures;
 /// # extern crate tokio_core;
 /// # extern crate tokio_zmq;
 /// #
 /// # use std::rc::Rc;
-/// # use std::convert::TryInto;
+/// # use std::convert::Into;
 /// #
 /// # use futures::Future;
-/// # use tokio_core::reactor::Core;
+/// # use tokio_reactor::Core;
 /// # use tokio_zmq::prelude::*;
 /// # use tokio_zmq::async::{MultipartResponse};
 /// # use tokio_zmq::{Error, Multipart, Rep, Socket};
@@ -229,8 +223,7 @@ impl Future for MultipartRequest {
 /// #     let ctx = Rc::new(zmq::Context::new());
 /// #     let rep: Rep = Socket::builder(ctx, &core.handle())
 /// #         .bind("tcp://*:5567")
-/// #         .try_into()
-/// #         .unwrap();
+/// #         .into();
 /// #     let socket = rep.socket();
 /// #     let sock = socket.inner_sock();
 /// #     let file = socket.inner_file();
@@ -259,7 +252,7 @@ impl MultipartResponse {
         let events = self.sock.get_events()? as i16;
 
         if events & zmq::POLLIN == 0 {
-            self.file.need_read();
+            self.file.clear_read_ready(Ready::readable())?;
 
             task::current().notify();
 
@@ -310,11 +303,11 @@ impl MultipartResponse {
     }
 
     fn check_read(&mut self) -> Result<bool, Error> {
-        if let Async::NotReady = self.file.poll_read() {
+        if let Ok(Async::NotReady) = self.file.poll_read_ready(Ready::readable()) {
             let events = self.sock.get_events()? as i16;
             if events & zmq::POLLIN != 0 {
                 // manually schedule a wakeup and procede
-                self.file.need_read();
+                self.file.clear_read_ready(Ready::readable())?;
                 task::current().notify();
             } else {
                 return Ok(false);

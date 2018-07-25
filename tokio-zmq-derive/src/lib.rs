@@ -88,13 +88,11 @@ fn build_try_from(s: &synstructure::Structure, name: &syn::Ident) -> quote::Toke
     let conf = try_from_conf.unwrap_or(syn::Ident::new("SockConfig"));
 
     quote! {
-        impl<'a> TryFrom<#conf<'a>> for #name {
-            type Error = Error;
-
-            fn try_from(conf: #conf<'a>) -> Result<Self, Self::Error> {
-                Ok(#name {
-                    inner: conf.build(zmq::#socket_type)?,
-                })
+        impl<'a> From<#conf<'a>> for #name {
+            fn from(conf: #conf<'a>) -> Self {
+                #name {
+                    inner: conf.build(zmq::#socket_type).unwrap(),
+                }
             }
         }
     }

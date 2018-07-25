@@ -17,12 +17,13 @@
  * along with Tokio ZMQ.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+use mio::Ready;
 use std::rc::Rc;
 use std::time::Duration;
 
 use futures::{Async, Future, Poll, Stream};
 use futures::future::Either;
-use tokio_core::reactor::PollEvented;
+use tokio_reactor::PollEvented;
 use tokio_file_unix::File;
 use tokio_timer::{Sleep, Timer};
 use zmq;
@@ -40,7 +41,6 @@ use prelude::{ControlHandler, EndHandler, StreamSocket};
 ///
 /// ### Example
 /// ```rust
-/// #![feature(conservative_impl_trait)]
 ///
 /// extern crate zmq;
 /// extern crate futures;
@@ -50,7 +50,7 @@ use prelude::{ControlHandler, EndHandler, StreamSocket};
 /// use std::rc::Rc;
 ///
 /// use futures::Stream;
-/// use tokio_core::reactor::Core;
+/// use tokio_reactor::Core;
 /// use tokio_zmq::async::MultipartStream;
 /// use tokio_zmq::{Error, Multipart, Socket};
 ///
@@ -117,7 +117,7 @@ impl MultipartStream {
             Async::Ready(item) => Ok(Async::Ready(Some(item))),
             Async::NotReady => {
                 self.response = Some(response);
-                self.file.need_read();
+                self.file.clear_read_ready(Ready::readable())?;
                 Ok(Async::NotReady)
             }
         }

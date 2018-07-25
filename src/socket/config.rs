@@ -22,7 +22,7 @@
 use std::rc::Rc;
 
 use zmq;
-use tokio_core::reactor::{Handle, PollEvented};
+use tokio_reactor::{PollEvented};
 use tokio_file_unix::File;
 
 use socket::Socket;
@@ -48,7 +48,6 @@ fn connect_all(sock: zmq::Socket, connects: &[&str]) -> zmq::Result<zmq::Socket>
 /// This struct contains a context and a handle to the current event loop.
 pub struct SocketBuilder<'a> {
     ctx: Rc<zmq::Context>,
-    handle: &'a Handle,
     identity: Option<&'a [u8]>,
 }
 
@@ -57,10 +56,9 @@ impl<'a> SocketBuilder<'a> {
     ///
     /// All sockets that are created through the Tokio ZMQ library will use this as the base for
     /// their socket builder (except PAIR sockets).
-    pub fn new(ctx: Rc<zmq::Context>, handle: &'a Handle) -> Self {
+    pub fn new(ctx: Rc<zmq::Context>) -> Self {
         SocketBuilder {
             ctx: ctx,
-            handle: handle,
             identity: None,
         }
     }
@@ -69,7 +67,6 @@ impl<'a> SocketBuilder<'a> {
     pub fn identity(self, identity: &'a [u8]) -> Self {
         SocketBuilder {
             ctx: self.ctx,
-            handle: self.handle,
             identity: Some(identity),
         }
     }
@@ -84,7 +81,6 @@ impl<'a> SocketBuilder<'a> {
 
         SockConfig {
             ctx: self.ctx,
-            handle: self.handle,
             bind: bind,
             connect: Vec::new(),
             identity: self.identity,
@@ -101,7 +97,6 @@ impl<'a> SocketBuilder<'a> {
 
         SockConfig {
             ctx: self.ctx,
-            handle: self.handle,
             bind: Vec::new(),
             connect: connect,
             identity: self.identity,
@@ -114,7 +109,6 @@ impl<'a> SocketBuilder<'a> {
     pub fn pair(self, addr: &'a str, bind: bool) -> PairConfig<'a> {
         PairConfig {
             ctx: self.ctx,
-            handle: self.handle,
             addr: addr,
             bind: bind,
             identity: self.identity,
@@ -128,7 +122,6 @@ impl<'a> SocketBuilder<'a> {
 /// SUB, which needs an additional `filter` parameter.
 pub struct SockConfig<'a> {
     pub ctx: Rc<zmq::Context>,
-    pub handle: &'a Handle,
     pub bind: Vec<&'a str>,
     pub connect: Vec<&'a str>,
     pub identity: Option<&'a [u8]>,
@@ -160,11 +153,10 @@ impl<'a> SockConfig<'a> {
     ///  - The caller is a wrapper type.
     ///  - The caller knows what they're doing.
     ///
-    /// For convenience, `TryFrom<SockConfig>` is implemented for all valid wrapper types.
+    /// For convenience, `From<SockConfig>` is implemented for all valid wrapper types.
     pub fn build(self, kind: zmq::SocketType) -> Result<Socket, Error> {
         let SockConfig {
             ctx,
-            handle,
             bind,
             connect,
             identity,
@@ -183,8 +175,7 @@ impl<'a> SockConfig<'a> {
 
         let file = Rc::new(PollEvented::new(
             File::new_nb(ZmqFile::from_raw_fd(fd))?,
-            handle,
-        )?);
+        ));
 
         Ok(Socket::from_sock_and_file(sock, file))
     }
@@ -194,7 +185,6 @@ impl<'a> SockConfig<'a> {
     pub fn filter(self, pattern: &'a [u8]) -> SubConfig<'a> {
         SubConfig {
             ctx: self.ctx,
-            handle: self.handle,
             bind: self.bind,
             connect: self.connect,
             identity: self.identity,
@@ -208,7 +198,6 @@ impl<'a> SockConfig<'a> {
 /// This contains all the information required to contstruct a valid SUB socket
 pub struct SubConfig<'a> {
     pub ctx: Rc<zmq::Context>,
-    pub handle: &'a Handle,
     pub bind: Vec<&'a str>,
     pub connect: Vec<&'a str>,
     pub filter: &'a [u8],
@@ -226,11 +215,10 @@ impl<'a> SubConfig<'a> {
     ///  - The caller is the Sub wrapper type.
     ///  - The caller knows what they're doing.
     ///
-    /// For convenience, `TryFrom<SockConfig>` is implemented for all valid wrapper types.
+    /// For convenience, `From<SockConfig>` is implemented for all valid wrapper types.
     pub fn build(self, _: zmq::SocketType) -> Result<Socket, Error> {
         let SubConfig {
             ctx,
-            handle,
             bind,
             connect,
             filter,
@@ -251,8 +239,7 @@ impl<'a> SubConfig<'a> {
 
         let file = Rc::new(PollEvented::new(
             File::new_nb(ZmqFile::from_raw_fd(fd))?,
-            handle,
-        )?);
+        ));
 
         Ok(Socket::from_sock_and_file(sock, file))
     }
@@ -263,7 +250,6 @@ impl<'a> SubConfig<'a> {
 /// This contains all the information required to contstruct a valid PAIR socket
 pub struct PairConfig<'a> {
     ctx: Rc<zmq::Context>,
-    handle: &'a Handle,
     addr: &'a str,
     bind: bool,
     identity: Option<&'a [u8]>,
@@ -279,7 +265,6 @@ impl<'a> PairConfig<'a> {
     pub fn build(self, _: zmq::SocketType) -> Result<Socket, Error> {
         let PairConfig {
             ctx,
-            handle,
             addr,
             bind,
             identity,
@@ -301,8 +286,7 @@ impl<'a> PairConfig<'a> {
 
         let file = Rc::new(PollEvented::new(
             File::new_nb(ZmqFile::from_raw_fd(fd))?,
-            handle,
-        )?);
+        ));
 
         Ok(Socket::from_sock_and_file(sock, file))
     }

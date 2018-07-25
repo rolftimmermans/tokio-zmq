@@ -24,7 +24,7 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 
 use zmq;
-use tokio_core::reactor::PollEvented;
+use tokio_reactor::PollEvented;
 use tokio_file_unix::File;
 use futures::{Async, AsyncSink, Future, Poll, Sink, StartSend};
 
@@ -40,7 +40,6 @@ use file::ZmqFile;
 ///
 /// ### Example
 /// ```rust
-/// #![feature(conservative_impl_trait)]
 ///
 /// extern crate zmq;
 /// extern crate futures;
@@ -50,7 +49,7 @@ use file::ZmqFile;
 /// use std::rc::Rc;
 ///
 /// use futures::{Future, Sink};
-/// use tokio_core::reactor::Core;
+/// use tokio_reactor::Core;
 /// use tokio_zmq::async::{MultipartStream};
 /// use tokio_zmq::{Error, Multipart, Socket};
 ///
@@ -129,7 +128,7 @@ where
             match self.poll_request(request)? {
                 Async::Ready(()) => {
                     self.make_request(multipart);
-                    self.file.need_write();
+                    self.file.clear_write_ready();
 
                     Ok(AsyncSink::Ready)
                 }
@@ -137,7 +136,7 @@ where
             }
         } else {
             self.make_request(multipart);
-            self.file.need_write();
+            self.file.clear_write_ready();
 
             Ok(AsyncSink::Ready)
         }

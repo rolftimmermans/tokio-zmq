@@ -67,7 +67,7 @@ pub trait StreamSocket: AsSocket {
     ///
     /// ### Example, using the Rep wrapper type
     /// ```rust
-    /// #![feature(try_from)]
+    /// // #![feature(try_from)]
     ///
     /// extern crate zmq;
     /// extern crate futures;
@@ -75,10 +75,10 @@ pub trait StreamSocket: AsSocket {
     /// extern crate tokio_zmq;
     ///
     /// use std::rc::Rc;
-    /// use std::convert::TryInto;
+    /// use std::convert::Into;
     ///
     /// use futures::Future;
-    /// use tokio_core::reactor::Core;
+    /// use tokio_reactor::Core;
     /// use tokio_zmq::prelude::*;
     /// use tokio_zmq::async::MultipartStream;
     /// use tokio_zmq::{Error, Multipart, Rep, Socket};
@@ -88,8 +88,7 @@ pub trait StreamSocket: AsSocket {
     ///     let context = Rc::new(zmq::Context::new());
     ///     let rep: Rep = Socket::builder(context, &core.handle())
     ///         .connect("tcp://localhost:5568")
-    ///         .try_into()
-    ///         .unwrap();
+    ///         .into();
     ///
     ///     let fut = rep.recv().and_then(|multipart| {
     ///         for msg in &multipart {
@@ -111,7 +110,7 @@ pub trait StreamSocket: AsSocket {
     ///
     /// ### Example, using a Sub wrapper type
     /// ```rust
-    /// #![feature(try_from)]
+    /// // #![feature(try_from)]
     ///
     /// extern crate zmq;
     /// extern crate futures;
@@ -119,10 +118,10 @@ pub trait StreamSocket: AsSocket {
     /// extern crate tokio_zmq;
     ///
     /// use std::rc::Rc;
-    /// use std::convert::TryInto;
+    /// use std::convert::Into;
     ///
     /// use futures::Stream;
-    /// use tokio_core::reactor::Core;
+    /// use tokio_reactor::Core;
     /// use tokio_zmq::prelude::*;
     /// use tokio_zmq::async::{MultipartStream};
     /// use tokio_zmq::{Error, Multipart, Socket, Sub};
@@ -133,8 +132,7 @@ pub trait StreamSocket: AsSocket {
     ///     let sub: Sub = Socket::builder(context, &core.handle())
     ///         .connect("tcp://localhost:5569")
     ///         .filter(b"")
-    ///         .try_into()
-    ///         .unwrap();
+    ///         .into();
     ///
     ///     let fut = sub.stream().for_each(|multipart| {
     ///         for msg in multipart {
@@ -160,7 +158,7 @@ pub trait SinkSocket: AsSocket {
     ///
     /// ### Example, using a Pub wrapper type
     /// ```rust
-    /// #![feature(try_from)]
+    /// // #![feature(try_from)]
     ///
     /// extern crate zmq;
     /// extern crate futures;
@@ -168,9 +166,9 @@ pub trait SinkSocket: AsSocket {
     /// extern crate tokio_zmq;
     ///
     /// use std::rc::Rc;
-    /// use std::convert::TryInto;
+    /// use std::convert::Into;
     ///
-    /// use tokio_core::reactor::Core;
+    /// use tokio_reactor::Core;
     /// use tokio_zmq::prelude::*;
     /// use tokio_zmq::async::MultipartStream;
     /// use tokio_zmq::{Error, Pub, Socket};
@@ -180,8 +178,7 @@ pub trait SinkSocket: AsSocket {
     ///     let context = Rc::new(zmq::Context::new());
     ///     let zpub: Pub = Socket::builder(context, &core.handle())
     ///         .connect("tcp://localhost:5569")
-    ///         .try_into()
-    ///         .unwrap();
+    ///         .into();
     ///
     ///     let msg = zmq::Message::from_slice(b"Hello").unwrap();
     ///
@@ -197,7 +194,7 @@ pub trait SinkSocket: AsSocket {
     ///
     /// ### Example, using a Pub wrapper type
     /// ```rust
-    /// #![feature(try_from)]
+    /// // #![feature(try_from)]
     ///
     /// extern crate zmq;
     /// extern crate futures;
@@ -205,11 +202,11 @@ pub trait SinkSocket: AsSocket {
     /// extern crate tokio_zmq;
     ///
     /// use std::rc::Rc;
-    /// use std::convert::TryInto;
+    /// use std::convert::Into;
     ///
     /// use futures::Stream;
     /// use futures::stream::iter_ok;
-    /// use tokio_core::reactor::Core;
+    /// use tokio_reactor::Core;
     /// use tokio_zmq::prelude::*;
     /// use tokio_zmq::async::MultipartStream;
     /// use tokio_zmq::{Error, Multipart, Pub, Socket};
@@ -219,8 +216,7 @@ pub trait SinkSocket: AsSocket {
     ///     let context = Rc::new(zmq::Context::new());
     ///     let zpub: Pub = Socket::builder(context, &core.handle())
     ///         .connect("tcp://localhost:5570")
-    ///         .try_into()
-    ///         .unwrap();
+    ///         .into();
     ///
     ///     let fut = iter_ok(0..5)
     ///         .and_then(|i| {

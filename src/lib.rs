@@ -17,9 +17,6 @@
  * along with Tokio ZMQ.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#![feature(conservative_impl_trait)]
-#![feature(try_from)]
-
 //! Tokio ZMQ, bringing ZeroMQ to the Tokio event loop
 //!
 //! This crate provides Streams, Sinks, and Futures for ZeroMQ Sockets, which deal in structures
@@ -40,18 +37,18 @@
 //! Without further ado, creating and using a socket:
 //!
 //! ```rust
-//! #![feature(try_from)]
+//! // #![feature(try_from)]
 //!
 //! extern crate zmq;
 //! extern crate futures;
 //! extern crate tokio_core;
 //! extern crate tokio_zmq;
 //!
-//! use std::convert::TryInto;
+//! use std::convert::Into;
 //! use std::rc::Rc;
 //!
 //! use futures::Stream;
-//! use tokio_core::reactor::Core;
+//! use tokio_reactor::Core;
 //! use tokio_zmq::prelude::*;
 //! use tokio_zmq::{Socket, Pub, Sub, Error};
 //!
@@ -68,12 +65,12 @@
 //!     // Note that the variable is named zpub, since pub is a keyword
 //!     let zpub: Pub = Socket::builder(Rc::clone(&context), &handle)
 //!         .bind("tcp://*:5561")
-//!         .try_into()?;
+//!         .into();
 //!
 //!     let sub: Sub = Socket::builder(context, &handle)
 //!         .bind("tcp://*:5562")
 //!         .filter(b"")
-//!         .try_into()?;
+//!         .into();
 //!
 //!     // Create our simple server. This forwards messages from the Subscriber socket to the
 //!     // Publisher socket, and prints them as they go by.
@@ -102,7 +99,8 @@
 extern crate futures;
 #[macro_use]
 extern crate log;
-extern crate tokio_core;
+extern crate mio;
+extern crate tokio_reactor;
 extern crate tokio_file_unix;
 extern crate tokio_timer;
 #[macro_use]
